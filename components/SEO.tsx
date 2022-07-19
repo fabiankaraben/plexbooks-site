@@ -1,9 +1,8 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import siteMetadata from '@/data/config/siteMetadata'
-// import { CoreContent } from '@/lib/utils/contentlayer'
-// import type { Blog, Authors } from 'contentlayer/generated'
-
+import siteMetadata from '@/data/siteMetadata'
+import { CoreContent } from '@/lib/utils/contentlayer'
+import type { Blog, Authors } from 'contentlayer/generated'
 interface CommonSEOProps {
   title: string
   description: string
@@ -17,6 +16,7 @@ interface CommonSEOProps {
   twImage: string
   canonicalUrl?: string
   noIndex: boolean
+  includeAdsense: boolean
 }
 
 const CommonSEO = ({
@@ -27,8 +27,11 @@ const CommonSEO = ({
   twImage,
   canonicalUrl,
   noIndex,
+  includeAdsense,
 }: CommonSEOProps) => {
   const router = useRouter()
+  // TEMP
+  includeAdsense = false
   return (
     <Head>
       <title>{title}</title>
@@ -53,6 +56,13 @@ const CommonSEO = ({
         rel="canonical"
         href={canonicalUrl ? canonicalUrl : `${siteMetadata.siteUrl}${router.asPath}`}
       />
+      {includeAdsense && (
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5376430835440290"
+          crossOrigin="anonymous"
+        ></script>
+      )}
     </Head>
   )
 }
@@ -61,9 +71,15 @@ interface PageSEOProps {
   title: string
   description: string
   noIndex?: boolean
+  includeAdsense?: boolean
 }
 
-export const PageSEO = ({ title, description, noIndex = false }: PageSEOProps) => {
+export const PageSEO = ({
+  title,
+  description,
+  noIndex = false,
+  includeAdsense = false,
+}: PageSEOProps) => {
   const ogImageUrl = siteMetadata.siteUrl + siteMetadata.socialBanner
   const twImageUrl = siteMetadata.siteUrl + siteMetadata.socialBanner
   return (
@@ -74,11 +90,17 @@ export const PageSEO = ({ title, description, noIndex = false }: PageSEOProps) =
       ogImage={ogImageUrl}
       twImage={twImageUrl}
       noIndex={noIndex}
+      includeAdsense={includeAdsense}
     />
   )
 }
 
-export const TagSEO = ({ title, description, noIndex = false }: PageSEOProps) => {
+export const TagSEO = ({
+  title,
+  description,
+  noIndex = false,
+  includeAdsense = false,
+}: PageSEOProps) => {
   const ogImageUrl = siteMetadata.siteUrl + siteMetadata.socialBanner
   const twImageUrl = siteMetadata.siteUrl + siteMetadata.socialBanner
   const router = useRouter()
@@ -91,6 +113,7 @@ export const TagSEO = ({ title, description, noIndex = false }: PageSEOProps) =>
         ogImage={ogImageUrl}
         twImage={twImageUrl}
         noIndex={noIndex}
+        includeAdsense={includeAdsense}
       />
       <Head>
         <link
@@ -104,98 +127,99 @@ export const TagSEO = ({ title, description, noIndex = false }: PageSEOProps) =>
   )
 }
 
-// interface BlogSeoProps extends CoreContent<Blog> {
-//   authorDetails?: CoreContent<Authors>[]
-//   url: string
-// }
+interface BlogSeoProps extends CoreContent<Blog> {
+  authorDetails?: CoreContent<Authors>[]
+  url: string
+}
 
-// export const BlogSEO = ({
-//   authorDetails,
-//   title,
-//   summary,
-//   date,
-//   lastmod,
-//   url,
-//   images = [],
-//   canonicalUrl,
-// }: BlogSeoProps) => {
-//   const publishedAt = new Date(date).toISOString()
-//   const modifiedAt = new Date(lastmod || date).toISOString()
-//   const imagesArr =
-//     images.length === 0
-//       ? [siteMetadata.socialBanner]
-//       : typeof images === 'string'
-//       ? [images]
-//       : images
+export const BlogSEO = ({
+  authorDetails,
+  title,
+  summary,
+  date,
+  lastmod,
+  url,
+  images = [],
+  canonicalUrl,
+}: BlogSeoProps) => {
+  const publishedAt = new Date(date).toISOString()
+  const modifiedAt = new Date(lastmod || date).toISOString()
+  const imagesArr =
+    images.length === 0
+      ? [siteMetadata.socialBanner]
+      : typeof images === 'string'
+      ? [images]
+      : images
 
-//   const featuredImages = imagesArr.map((img) => {
-//     return {
-//       '@type': 'ImageObject',
-//       url: `${siteMetadata.siteUrl}${img}`,
-//     }
-//   })
+  const featuredImages = imagesArr.map((img) => {
+    return {
+      '@type': 'ImageObject',
+      url: `${siteMetadata.siteUrl}${img}`,
+    }
+  })
 
-//   let authorList
-//   if (authorDetails) {
-//     authorList = authorDetails.map((author) => {
-//       return {
-//         '@type': 'Person',
-//         name: author.name,
-//       }
-//     })
-//   } else {
-//     authorList = {
-//       '@type': 'Person',
-//       name: siteMetadata.author,
-//     }
-//   }
+  let authorList
+  if (authorDetails) {
+    authorList = authorDetails.map((author) => {
+      return {
+        '@type': 'Person',
+        name: author.name,
+      }
+    })
+  } else {
+    authorList = {
+      '@type': 'Person',
+      name: siteMetadata.author,
+    }
+  }
 
-//   const structuredData = {
-//     '@context': 'https://schema.org',
-//     '@type': 'Article',
-//     mainEntityOfPage: {
-//       '@type': 'WebPage',
-//       '@id': url,
-//     },
-//     headline: title,
-//     image: featuredImages,
-//     datePublished: publishedAt,
-//     dateModified: modifiedAt,
-//     author: authorList,
-//     publisher: {
-//       '@type': 'Organization',
-//       name: siteMetadata.author,
-//       logo: {
-//         '@type': 'ImageObject',
-//         url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
-//       },
-//     },
-//     description: summary,
-//   }
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    headline: title,
+    image: featuredImages,
+    datePublished: publishedAt,
+    dateModified: modifiedAt,
+    author: authorList,
+    publisher: {
+      '@type': 'Organization',
+      name: siteMetadata.author,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
+      },
+    },
+    description: summary,
+  }
 
-//   const twImageUrl = featuredImages[0].url
+  const twImageUrl = featuredImages[0].url
 
-//   return (
-//     <>
-//       <CommonSEO
-//         title={title}
-//         description={summary}
-//         ogType="article"
-//         ogImage={featuredImages}
-//         twImage={twImageUrl}
-//         canonicalUrl={canonicalUrl}
-//         noIndex={false}
-//       />
-//       <Head>
-//         {date && <meta property="article:published_time" content={publishedAt} />}
-//         {lastmod && <meta property="article:modified_time" content={modifiedAt} />}
-//         <script
-//           type="application/ld+json"
-//           dangerouslySetInnerHTML={{
-//             __html: JSON.stringify(structuredData, null, 2),
-//           }}
-//         />
-//       </Head>
-//     </>
-//   )
-// }
+  return (
+    <>
+      <CommonSEO
+        title={title}
+        description={summary}
+        ogType="article"
+        ogImage={featuredImages}
+        twImage={twImageUrl}
+        canonicalUrl={canonicalUrl}
+        noIndex={false}
+        includeAdsense={true}
+      />
+      <Head>
+        {date && <meta property="article:published_time" content={publishedAt} />}
+        {lastmod && <meta property="article:modified_time" content={modifiedAt} />}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData, null, 2),
+          }}
+        />
+      </Head>
+    </>
+  )
+}

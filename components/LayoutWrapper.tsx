@@ -1,14 +1,12 @@
-import siteMetadata from '@/data/config/siteMetadata'
-import headerNavLinks from '@/data/config/headerNavLinks'
-// import Logo from '@/data/logo.svg'
+import siteMetadata from '@/data/siteMetadata'
+import headerNavLinks from '@/data/headerNavLinks'
+import Logo from '@/data/logo.svg'
 import Link from './Link'
 import SectionContainer from './SectionContainer'
 import Footer from './Footer'
 import MobileNav from './MobileNav'
 import ThemeSwitch from './ThemeSwitch'
 import { ReactNode } from 'react'
-
-import Image from './Image'
 
 interface Props {
   children: ReactNode
@@ -23,13 +21,7 @@ const LayoutWrapper = ({ children }: Props) => {
             <Link href="/" aria-label={siteMetadata.headerTitle}>
               <div className="flex items-center justify-between">
                 <div className="mr-3">
-                  {/* <Logo /> */}
-                  <Image
-              alt="plexbooks.com"
-              src='/static/logo.png'
-              width={40}
-              height={40}
-            />
+                  <Logo />
                 </div>
                 {typeof siteMetadata.headerTitle === 'string' ? (
                   <div className="hidden h-6 text-2xl font-semibold sm:block">
